@@ -14,10 +14,12 @@ This is a simple change that is necessary to update the color of the rover
 2.) Open the find dialogue and search for  “Run autonomous controller function”
 
 3.) Change…
-  		% Run autonomous controller function
+  		
+		% Run autonomous controller function
                 feval(fileName,obj);
 Into...
-                % Run autonomous controller function
+             
+	     	% Run autonomous controller function
                 feval(fileName,obj,handles);
 
 4.) Don’t forget to add ‘handlesGUI’ as an input to the main function 
