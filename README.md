@@ -8,7 +8,9 @@ It will be updated accordingly
 This is a simple change that is necessary to update the color of the rover
 
 1.) Open SimulatorGUI.m script
+
 2.) Open the find dialogue and search for  “Run autonomous controller function”
+
 3.) Change…
                 % Run autonomous controller function
                 feval(fileName,obj);
