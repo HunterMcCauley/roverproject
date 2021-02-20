@@ -1,10 +1,4 @@
 clear all % <—–– Watch out if you need workspace vars
-% MESSAGE TO INSTRUCTORS: I noticed the deliverables page said upload code
-% file(s), and the individual code section said to place map.txt files in
-% the header so I didn't know if I should should submit this as well. Its a
-% simple program I made mainly for myself but gave to the team. It appends
-% a text file with circular wall or painted line segments. This is so we
-% can build a circular maze much quicker.
 
 %{  
     Every time you run this program, it will add a circular wall/line 
