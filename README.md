@@ -5,7 +5,7 @@ This is a supporting file for notes and instructions
 
 It will be updated accordingly 
 
-# ——————— INSTRUCTIONS FOR MODDING THE SimulatorGUI.m FUNCTION ———————
+# INSTRUCTIONS FOR MODDING THE SimulatorGUI.m FUNCTION 
 
 This is a simple change that is necessary to update the color of the rover
 
