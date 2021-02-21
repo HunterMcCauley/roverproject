@@ -22,31 +22,37 @@ function P__main__(rover,handlesGUI)
     tstart = tic;
     
     % plot beacons for demonstration because im too lazy to load maps
-    setMap(rover,[],[],{[1],[0],[1],[1],[1],'b1'; [-1],[0],[1],[1],[1],'b2'},[]);
+    setMap(rover,[],[],{[1],[0],[1],[1],[1],'right'; [-1],[0],[1],[1],[1],'right'; [1],[1],[1],[1],[1],'right';[-1],[1],[1],[1],[1],'wrong'},[]);
     plot(1,0,'Color',[.5 .5 .5],'Marker','o')
     plot(-1,0,'Color',[.5 .5 .5],'Marker','o')
-    text(1,0,['  ' 'b1']);
-    text(-1,0,['  ' 'b2']);
-    
+    plot(1,1,'Color',[.5 .5 .5],'Marker','o')
+    plot(-1,1,'Color',[.5 .5 .5],'Marker','o')    
+    text(1,0,['  ' 'right']);
+    text(-1,0,['  ' 'right']);
+    text(1,1,['  ' 'right']);
+    text(-1,1,['  ' 'wrong']);    
     % vroom vroom rover
     LineFollower(rover,tstart)
+
     
-    %% THIS WILL NEED TO BE IN THE REAL MAIN FUNCTION TO WORK %%
+    %% THIS WILL NEED TO BE IN THE REAL MAIN FUNCTION TO WORK %% 
     while true
         BaconDetection(rover,tstart,handlesGUI)
     end
 end
     
 %% Beginning of actual BeaconDetection function, bacon for now because names
-function BaconDetection(rover,tstart,handlesGUI)
+function BaconDetection(rover,tstart,handlesGUI,th)
     % Scan for beacons and record data from closest
     [X, Y, Z, Rot, ID] = ReadBeacon(rover);
+    [dist id] = min(sqrt(X.^2+Z.^2));
+    ID = ID(id,:);
     
     % If beacon is within range
-    if sqrt(X^2+Z^2)<=0.4
+    if dist <= 0.2
         
         % Center rover on beacon
-        travelDist(rover,0.5,sqrt(X^2+Z^2)+0.103);
+        travelDist(rover,0.5,dist+0.103);
         % Stop rover from moving
         SetDriveWheelsCreate(rover,0,0);
         
@@ -54,20 +60,64 @@ function BaconDetection(rover,tstart,handlesGUI)
         % NEED TO MAKE A VAR TO HOLD COLOR DATA, EACH WRONG DECISION BRINGS
         % BLUE SHADE UP AND EACH RIGHT DECISION BRINGS RED SHADE UP (OR
         % BRING OPPOSITE COLOR DOWN) (OR A MIX OR BOTH)
-        if ID == 'b1'
-            handles_robot= get(handlesGUI.figure_simulator,'UserData');
-            set(handles_robot(1),'Color',[1 0 0]);
-            set(handles_robot(2),'Color',[1 0 0]);
-            fprintf('\nYoure getting hotter (closer)\n');
-        elseif ID == 'b2'
-            handles_robot= get(handlesGUI.figure_simulator,'UserData');
-            set(handles_robot(1),'Color',[0 0 1]);
-            set(handles_robot(2),'Color',[0 0 1]);
+        
+        % Get robot information
+        handles_robot= get(handlesGUI.figure_simulator,'UserData');
+        % Set var to rover's current color value
+        color = handles_robot.Color;
+        
+        % Wrong choice beacon encountered
+        k = 0.5;
+        if strcmpi(ID, 'wrong')
+            if color(1) == 1 && color(2) < 1
+                color(2) = color(2)+k;
+                
+            elseif color(1) > 0 && color(2) == 1
+                color(1) = color(1)-k;
+                
+            elseif color(2) == 1 && color(3) < 1
+                color(3) = color(3)+k;
+                
+            elseif color(2) > 0 && color(3) == 1 
+                color(2) = color(2)-k;
+                
+            else
+
+            end
             fprintf('\nYoure getting colder (farther)\n');
+            
+        elseif strcmpi(ID, 'right')
+             if color(3) == 1 && color(2) < 1
+                color(2) = color(2)+k;
+                
+            elseif color(3) > 0 && color(2) == 1
+                color(3) = color(3)-k;
+                
+            elseif color(2) == 1 && color(1) < 1
+                color(1) = color(1)+k;
+                
+            elseif color(2) > 0 && color(1) == 1 
+                color(2) = color(2)-k;
+             else
+                
+            end
+
+            fprintf('\nYoure getting hotter (closer)\n');
         end
         
+        for i = 1:3
+            fprintf('\t\tThis is color %.0f: %0.3f\n',[i,color(i)]);
+            if color(i) < 0
+                color(i) = 0;
+            elseif color(i) > 1
+                color(i) = 1;
+            end
+        end
+        set(handles_robot(1),'Color',color);
+        set(handles_robot(2),'Color',color);
+        
         % Call image recognition function for next step
-        ImageRecognition(rover,tstart);
+        ImageRecognition(rover,tstart,handlesGUI);
     end    
 end
 
@@ -75,18 +125,24 @@ end
 function LineFollower(rover,tstart)
     % Go Dog Go!
     SetDriveWheelsCreate(rover,0.5,0.5)
-    if toc(tstart) > 1200
+    if toc(tstart) > 2400
         % No Dog No!
         SetDriveWheelsCreate(rover,0,0);
     end
 end
 
 %% This is a Pseudo image recognition func to verify compatibility and req
-function ImageRecognition(rover, tstart)
+function ImageRecognition(rover, tstart, handlesGUI)
     % Wheeeeeee
-    turnAngle(rover,0.5,180);
+    obj= get(handlesGUI.text_title,'UserData');
+    cord = rover.posAbs;
+    th = rover.thAbs;
+    th = th+pi/2;                     % Direction is set by second mouse click
+    origin= [cord(1) cord(2) th];         % Start point is set by first mouse click
+    setMapStart(obj,origin)
     % Good job encouragement
     fprintf('\nYaY! You hit a beacon and made a decision. \n Returning to line follower function...\n');
     % Pass on responsibility 
+    pause(1);
     LineFollower(rover,tstart);
 end
